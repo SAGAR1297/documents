@@ -1,0 +1,57 @@
+sudo apt update
+sudo apt install build-essential dkms linux-headers-$(uname -r)
+
+
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+
+
+curl -fsSL https://test.docker.com -o test-docker.sh
+sudo sh test-docker.sh
+
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+
+sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+sudo swapoff -a
+
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+
+sudo rm /etc/containerd/config.toml
+systemctl restart containerd
+
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+export KUBECONFIG=$HOME/.kube/config
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+s
+kubectl apply -f https://github.com/ZTE/Knitter/blob/master/_config.yml
+
+
+The above kubectl apply -f command wasnot working. There was an error- the connection to the server 10.0.2.15:6443 was refused
+This was resolved by following the below steps
+
+1. sudo -i
+
+2. swapoff -a
+
+3. exit
+
+4. strace -eopenat kubectl version
+
+
+kubeadm join 10.2.15:6443 --token aj3nav.yst896cmfq2cxcoi \--discovery-token-ca-cert-hash sha256:dbd4d59d83e0a5db4e767a851eca452118cdf614181a7eb52369f777bedf0a17
+
+

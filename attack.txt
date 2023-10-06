@@ -1,0 +1,18 @@
+https://sagar.kubewaf.com/?q=../../../etc/passwd
+
+https://sagar.kubewaf.com/php?article=1
+
+https://sagar.kubewaf.com/?category=books&id=10
+
+http://sagar.kubewaf.com/index.php?page=php://filter/convert.base64-encode/resource=index
+
+https://sagar.kubewaf.com/../../../../var/log/dmessage
+
+https://sagar.kubewaf.com/?q=<script>alert(1)</script>
+
+nidhin.mp@prophaze.com
+vais@prophaze.com
+
+server
+varnish CDN
+nginx mysql wordpress

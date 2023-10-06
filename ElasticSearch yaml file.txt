@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: elasticsearch-data  # Name of the Persistent Volume
+spec:
+  capacity:
+    storage: 10Gi  # Storage capacity
+  accessModes:
+    - ReadWriteOnce  # Access mode (can be ReadWriteOnce, ReadOnlyMany, or ReadWriteMany)
+  storageClassName: local-path  # Storage class name (if applicable)
+  hostPath:
+    path: /mnt  # Path on the host machine
+  persistentVolumeReclaimPolicy: Retain  # Reclaim policy (can be Retain, Recycle, or Delete)
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-basic-auth
+type: kubernetes.io/basic-auth
+stringData:
+  username: user   # required field for kubernetes.io/basic-auth
+  password: mypassword # required field for kubernetes.io/basic-auth
+  roles: superuser #This gives all the privileges to this user
+---
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: quickstart
+spec:
+  version: 8.10.2
+  nodeSets:
+    - name: default
+      count: 1
+      config:
+        node.store.allow_mmap: false
+        xpack.security.enabled: true
+      volumeClaimTemplates:               #Volume is mentioned from here
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            storageClassName: local-path  # Name of your storage class
+            resources:
+              requests:
+                storage: 2Gi  # Size of the PVC (must match the PVC size)
+  auth:                                # This is the secret 
+      fileRealm:
+       - secretName: secret-basic-auth

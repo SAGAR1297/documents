@@ -1,0 +1,50 @@
+
+
+--------------------------
+
+openssl genrsa -des3 -out  myhost1.key 2048
+openssl req -new -key  myhost1.key -out myhost1.csr
+cp myhost1.key myhost1.key.pw
+openssl rsa -in myhost1.key.pw -out myhost1.key
+openssl x509 -req -in myhost1.csr -signkey myhost1.key -out myhost1.crt
+ 
+
+
+---------------
+server {
+        listen 443 ssl default_server;
+        listen [::]:443 ssl default_server;
+        ssl_certificate /etc/letsencrypt/live/sagar.kubewaf.com/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/sagar.kubewaf.com/privkey.pem;
+        root /var/www/html;
+        index index.html index.htm index.nginx-debian.html;
+        server_name _;
+        location / {
+                try_files $uri $uri/ =404;
+        }
+}
+
+
+
+
+
+
+
+
+
+
+
+server {
+        listen 443 ssl default_server;
+        listen [::]:443 ssl default_server;
+        ssl_certificate /etc/nginx/certificate/nginx-certificate.crt;
+        ssl_certificate_key /etc/nginx/certificate/nginx.key;
+        root /var/www/html;
+        index index.html index.htm index.nginx-debian.html;
+        server_name _;
+        location / {
+                try_files $uri $uri/ =404;
+        }
+}
+
+

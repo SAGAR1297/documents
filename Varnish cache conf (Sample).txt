@@ -1,0 +1,82 @@
+set beresp.ttl = 5m;  // Set cache time to 5 minutes
+    set beresp.http.Cache-Control = "public, max-age=300";  // Cache for 5 minutes
+    // Other backend response settings...
+
+
+
+sub vcl_recv {
+    if (client.ip == "192.168.1.1") {
+        set req.http.X-Cache-Key = "ip_cache_1";
+    }
+    else if (client.ip == "192.168.1.2") {
+        set req.http.X-Cache-Key = "ip_cache_2";
+    }
+    else {
+        set req.http.X-Cache-Key = "default_cache";
+    }
+
+    // Rest of the vcl_recv logic...
+}
+
+sub vcl_backend_response {
+    set beresp.ttl = 5m;  // Set cache time to 5 minutes
+
+    if (req.http.X-Cache-Key == "ip_cache_1") {
+        set beresp.http.Cache-Control = "public, max-age=300";  // Cache for 5 minutes
+    }
+    else if (req.http.X-Cache-Key == "ip_cache_2") {
+        set beresp.http.Cache-Control = "public, max-age=600";  // Cache for 10 minutes
+    }
+    else {
+        // Default cache control settings...
+    }
+
+    // Rest of the vcl_backend_response logic...
+}
+
+=================================
+VARNISH CONFIGURATION FILES
+
+vcl 4.0;
+backend default {
+    .host = "20.118.157.215";
+    .port = "443";
+}
+
+sub vcl_recv {
+    if (req.http.host == "sagar.kubewaf.com") {
+        set req.backend_hint = default;
+        if (req.http.X-Forwarded-Proto !~ "https") {
+            set req.http.X-Forwarded-Proto = "https";
+            return (synth(301, ""));
+       }
+    }
+}
+
+sub vcl_synth {
+    if (resp.status == 301) {
+        set resp.status = 301;
+        set resp.http.Location = "https://" + req.http.host + req.url;
+        return (deliver);
+    }
+}
+
+
+
+=============================================================================================
+
+
+
+sub vcl_backend_response {
+    # Happens after we have read the response headers from the backend.
+   # #
+    # Here you clean the response headers, removing silly Set-Cookie headers
+    # and other mistakes your backend does.
+}
+
+sub vcl_deliver {
+    # Happens when we have all the pieces we need, and are about to send the
+    # response to the client.
+    #
+    # You can do accounting or modifying the final object here.
+}

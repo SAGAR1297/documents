@@ -1,0 +1,11 @@
+These commands need to be run while creating the kubernetes cluster using rancher. These are used to troubleshoot the networking problems between rancher and virtual machines created using vultr.
+
+
+
+
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
